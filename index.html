@@ -176,11 +176,68 @@
                 document.activeElement.blur();
             }
 
-            try {
-                // Ensure fonts are loaded
-                await document.fonts.ready;
+            // 1. Create a hidden iframe for isolated rendering
+            // This fixes the alignment/offset issue by isolating the capture environment
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.left = '-10000px';
+            iframe.style.top = '0';
+            iframe.style.width = '794px';
+            iframe.style.height = '1123px';
+            document.body.appendChild(iframe);
 
-                // Create PDF (A4)
+            const iframeDoc = iframe.contentWindow.document;
+
+            // 2. Clone Styles
+            const styles = Array.from(document.styleSheets)
+                .map(sheet => {
+                    try {
+                        return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
+                    } catch (e) { return ''; }
+                }).join('\n');
+
+            // 3. Prepare Iframe Content
+            iframeDoc.open();
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        ${styles}
+                        .resume-container { 
+                            width: 794px !important; 
+                            height: 1123px !important; 
+                            margin: 0 !important; 
+                            box-shadow: none !important;
+                            display: grid !important;
+                            grid-template-columns: 33% 67% !important;
+                        }
+                        .top-nav, .button-group { display: none !important; }
+                        body { margin: 0; padding: 0; background: white; overflow: hidden; }
+                    </style>
+                </head>
+                <body>
+                    ${element.outerHTML}
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+
+            try {
+                // 4. Wait for fonts and styles to load in iframe
+                await new Promise(resolve => {
+                    const checkLoaded = () => {
+                        if (iframe.contentWindow.document.readyState === 'complete') {
+                            setTimeout(resolve, 500);
+                        } else {
+                            setTimeout(checkLoaded, 100);
+                        }
+                    };
+                    checkLoaded();
+                });
+
+                // 5. Generate PDF from Iframe content (Definitive 1:1 Parity)
                 const doc = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
@@ -189,9 +246,7 @@
                     precision: 16
                 });
 
-                // High-Fidelity Capture Settings (Text-Selectable)
-                // Width 210mm (target) / 794px (source) ensures 1:1 scale at 96dpi
-                await doc.html(element, {
+                await doc.html(iframeDoc.body, {
                     callback: function (doc) {
                         const totalPages = doc.internal.getNumberOfPages();
                         if (totalPages > 1) {
@@ -199,7 +254,8 @@
                         }
                         doc.save('Chetana_CN_Resume.pdf');
 
-                        // Restore UI
+                        // Restore UI and cleanup
+                        document.body.removeChild(iframe);
                         btnText.style.display = 'inline';
                         btnLoader.style.display = 'none';
                         btn.disabled = false;
@@ -220,6 +276,7 @@
                 });
             } catch (err) {
                 console.error('PDF Generation Error:', err);
+                if (document.body.contains(iframe)) document.body.removeChild(iframe);
                 alert('PDF generation failed. Check console.');
                 btnText.style.display = 'inline';
                 btnLoader.style.display = 'none';
