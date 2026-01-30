@@ -155,13 +155,13 @@
             const element = document.querySelector('.resume-container');
             const buttons = document.querySelectorAll('.button-group, .download-btn');
 
-            // 1. Hide buttons
+            // 1. Hide interactive elements
             buttons.forEach(btn => btn.style.display = 'none');
 
-            // 2. Add compact-pdf class for perfect A4 layout
+            // 2. Apply the "Fixed-A4" overlay class (forces layout to 0,0 fixed)
             element.classList.add('compact-pdf');
 
-            // 3. Ensure we are scrolled to the top for a clean capture
+            // 3. Force scroll to top (important for html2canvas origin)
             window.scrollTo(0, 0);
 
             const opt = {
@@ -169,12 +169,16 @@
                 filename: 'Chetana_CN_Resume.pdf',
                 image: { type: 'jpeg', quality: 1.0 },
                 html2canvas: {
-                    scale: 3,
+                    scale: 2,
                     useCORS: true,
                     letterRendering: true,
                     scrollY: 0,
                     scrollX: 0,
-                    windowWidth: 800 // Close to A4 pixel width
+                    windowWidth: 1000, // Safe width for capture
+                    width: 794,        // Exact A4 width in px at 96 DPI
+                    height: 1123,      // Exact A4 height in px at 96 DPI
+                    x: 0,              // Capture starts exactly at 0,0
+                    y: 0
                 },
                 jsPDF: {
                     unit: 'mm',
@@ -183,15 +187,31 @@
                 }
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Restore state
-                element.classList.remove('compact-pdf');
-                buttons.forEach(btn => btn.style.display = 'inline-block');
-            }).catch(err => {
-                console.error('PDF Generation Error:', err);
-                element.classList.remove('compact-pdf');
-                buttons.forEach(btn => btn.style.display = 'inline-block');
-            });
+            // Use worker to ensure cleanup
+            const worker = html2pdf()
+                .set(opt)
+                .from(element)
+                .toPdf()
+                .get('pdf')
+                .then((pdf) => {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    if (totalPages > 1) {
+                        for (let i = totalPages; i > 1; i--) {
+                            pdf.deletePage(i);
+                        }
+                    }
+                })
+                .save()
+                .then(() => {
+                    // Restore state
+                    element.classList.remove('compact-pdf');
+                    buttons.forEach(btn => btn.style.display = 'inline-block');
+                })
+                .catch(err => {
+                    console.error('PDF Generation Error:', err);
+                    element.classList.remove('compact-pdf');
+                    buttons.forEach(btn => btn.style.display = 'inline-block');
+                });
         }
 
         function downloadDOCX() {
