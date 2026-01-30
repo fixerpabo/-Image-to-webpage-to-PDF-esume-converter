@@ -28,33 +28,35 @@
     <div class="resume-container">
         <aside class="sidebar">
             <header class="sidebar-header">
-                <h1>Chetana CN</h1>
+                <h1 contenteditable="true">Chetana CN</h1>
                 <div class="divider"></div>
-                <h2>ASSOCIATE PRODUCT MANAGER</h2>
+                <h2 contenteditable="true">ASSOCIATE PRODUCT MANAGER</h2>
             </header>
 
             <section class="sidebar-section">
                 <h3>Details</h3>
-                <p>8074712529</p>
-                <p><a href="mailto:chinnnagireddy.chetana@gmail.com">chinnnagireddy.chetana@gmail.com</a></p>
+                <p contenteditable="true">8074712529</p>
+                <p><a href="mailto:chinnnagireddy.chetana@gmail.com"
+                        contenteditable="true">chinnnagireddy.chetana@gmail.com</a></p>
             </section>
 
             <section class="sidebar-section">
                 <h3>Links</h3>
                 <ul class="link-list">
                     <li><a href="https://www.linkedin.com/in/c-n-chetana-93a716258/" target="_blank"
-                            rel="noopener noreferrer">LinkedIn</a></li>
-                    <li><a href="https://github.com/fixerpabo" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                            rel="noopener noreferrer" contenteditable="true">LinkedIn</a></li>
+                    <li><a href="https://github.com/fixerpabo" target="_blank" rel="noopener noreferrer"
+                            contenteditable="true">GitHub</a></li>
                     <li><a href="https://www.notion.so/2f8f6ae4ef9480f19144c745ca574cb2?v=2f8f6ae4ef9480ddaa9f000c276cc769&source=copy_link"
-                            target="_blank" rel="noopener noreferrer">Notion</a></li>
-                    <li><a href="https://medium.com/@chinnanagireddy.chetana" target="_blank"
-                            rel="noopener noreferrer">Medium</a></li>
+                            target="_blank" rel="noopener noreferrer" contenteditable="true">Notion</a></li>
+                    <li><a href="https://medium.com/@chinnanagireddy.chetana" target="_blank" rel="noopener noreferrer"
+                            contenteditable="true">Medium</a></li>
                 </ul>
             </section>
 
             <section class="sidebar-section">
                 <h3>Skills</h3>
-                <ul class="skill-list">
+                <ul class="skill-list" contenteditable="true">
                     <li>Product Discovery</li>
                     <li>Problem Framing</li>
                     <li>MVP Scoping</li>
@@ -86,7 +88,8 @@
         <main class="main-content">
             <section class="content-section">
                 <h3>Profile</h3>
-                <p>Product Manager / Project Manager with 2+ years owning end-to-end lifecycle for 8+ products across
+                <p contenteditable="true">Product Manager / Project Manager with 2+ years owning end-to-end lifecycle
+                    for 8+ products across
                     ERP, ATS, and AI/LLM platforms. Delivered 4+ MVPs with 30-40% faster time to market, 95% on-time
                     delivery across 3+ concurrent projects, and 25% less rework by aligning 15+ stakeholders.
                     Technically fluent in API design, data models, and UAT; metrics-driven on KPIs/OKRs, usability, and
@@ -97,10 +100,10 @@
                 <h3>Employment History</h3>
                 <div class="job-entry">
                     <div class="job-header">
-                        <h4>Product Manager / Project Manager / Business Analyst, ADAINSYS</h4>
-                        <span class="date">MAR 2022 — PRESENT</span>
+                        <h4 contenteditable="true">Product Manager / Project Manager / Business Analyst, ADAINSYS</h4>
+                        <span class="date" contenteditable="true">MAR 2022 — PRESENT</span>
                     </div>
-                    <ul>
+                    <ul contenteditable="true">
                         <li>Owned end-to-end delivery of 8+ products across ERP, ATS, AI platforms, and
                             workflow/academic automation—from discovery and requirements to launch, iteration, and
                             adoption.</li>
@@ -119,8 +122,8 @@
                         <li>Partnered with engineering on API design, system workflows, and data models; maintained
                             documentation in Notion and product writing on Medium.</li>
                     </ul>
-                    <h5 class="initiatives-label">Selected product initiatives:</h5>
-                    <ul class="initiatives-list">
+                    <h5 class="initiatives-label" contenteditable="true">Selected product initiatives:</h5>
+                    <ul class="initiatives-list" contenteditable="true">
                         <li><strong>AI Meeting Management Platform:</strong> scoped transcription, summaries, action
                             items, semantic search, and analytics using Whisper and GPT/Claude; collaborated on
                             AWS-based deployment approach.</li>
@@ -138,6 +141,13 @@
                 </div>
             </section>
 
+            <section class="content-section">
+                <h3>Education</h3>
+                <div class="education-entry">
+                    <h4 contenteditable="true">B.Tech, Computer Science, Marri Laxman Reddy Institute of Technology</h4>
+                    <p contenteditable="true">GPA: 8.3/10</p>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -161,6 +171,11 @@
             btnLoader.style.display = 'inline';
             btn.disabled = true;
 
+            // Blur any active edit to ensure focus rings aren't captured
+            if (document.activeElement && document.activeElement.blur) {
+                document.activeElement.blur();
+            }
+
             try {
                 // Ensure fonts are loaded
                 await document.fonts.ready;
@@ -174,8 +189,8 @@
                     precision: 16
                 });
 
-                // High-Fidelity Capture Settings
-                // We use autoPaging: 'text' to ensure selectable text
+                // High-Fidelity Capture Settings (Text-Selectable)
+                // Width 210mm (target) / 794px (source) ensures 1:1 scale at 96dpi
                 await doc.html(element, {
                     callback: function (doc) {
                         const totalPages = doc.internal.getNumberOfPages();
@@ -191,19 +206,21 @@
                     },
                     x: 0,
                     y: 0,
-                    width: 210, // A4 width in mm
-                    windowWidth: 794, // Standard A4 width in px for consistent rendering
+                    width: 210,
+                    windowWidth: 794,
                     html2canvas: {
                         scale: 1,
                         useCORS: true,
                         letterRendering: true,
                         backgroundColor: '#ffffff',
-                        logging: false
+                        logging: false,
+                        scrollX: 0,
+                        scrollY: 0
                     }
                 });
             } catch (err) {
                 console.error('PDF Generation Error:', err);
-                alert('PDF generation failed. Please check the console for details.');
+                alert('PDF generation failed. Check console.');
                 btnText.style.display = 'inline';
                 btnLoader.style.display = 'none';
                 btn.disabled = false;
