@@ -155,14 +155,57 @@
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const element = document.querySelector('.resume-container');
-            const buttons = document.querySelectorAll('.button-group, .download-btn');
 
-            // 1. Prepare UI
-            buttons.forEach(btn => btn.style.display = 'none');
-            element.classList.add('compact-pdf');
-            window.scrollTo(0, 0);
+            // 1. Create a hidden iframe for isolated rendering
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.left = '-10000px';
+            iframe.style.top = '0';
+            iframe.style.width = '794px'; // A4 width at 96 DPI
+            iframe.style.height = '1123px'; // A4 height at 96 DPI
+            document.body.appendChild(iframe);
 
-            // 2. Setup jsPDF for A4
+            const iframeDoc = iframe.contentWindow.document;
+
+            // 2. Clone Styles
+            const styles = Array.from(document.styleSheets)
+                .map(sheet => {
+                    try {
+                        return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
+                    } catch (e) { return ''; }
+                }).join('\n');
+
+            // 3. Prepare Iframe Content
+            iframeDoc.open();
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        ${styles}
+                        .resume-container { 
+                            width: 794px !important; 
+                            height: 1123px !important; 
+                            margin: 0 !important; 
+                            box-shadow: none !important;
+                            grid-template-columns: 30% 70% !important;
+                        }
+                        .button-group, .download-btn { display: none !important; }
+                        body { margin: 0; padding: 0; background: white; }
+                    </style>
+                </head>
+                <body>
+                    ${element.outerHTML}
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+
+            // Wait for fonts and styles to load in iframe
+            await new Promise(resolve => iframe.contentWindow.onload = resolve);
+
+            // 4. Generate PDF from Iframe
             const doc = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
@@ -170,43 +213,30 @@
                 compress: true
             });
 
-            // 3. Capture with precise scaling
-            // 794px is standard A4 width @ 96 DPI
             try {
-                await doc.html(element, {
+                await doc.html(iframeDoc.body, {
                     callback: function (doc) {
-                        // Cleanup multi-page overlaps
                         const totalPages = doc.internal.getNumberOfPages();
                         if (totalPages > 1) {
-                            for (let i = totalPages; i > 1; i--) {
-                                doc.deletePage(i);
-                            }
+                            for (let i = totalPages; i > 1; i--) { doc.deletePage(i); }
                         }
-
                         doc.save('Chetana_CN_Resume.pdf');
-
-                        // Restore state
-                        element.classList.remove('compact-pdf');
-                        buttons.forEach(btn => btn.style.display = 'inline-block');
+                        document.body.removeChild(iframe);
                     },
                     x: 0,
                     y: 0,
-                    width: 210, // A4 width in mm
-                    windowWidth: 794, // Source width in pixels (matches CSS .compact-pdf)
+                    width: 210, // Target A4 width in mm
+                    windowWidth: 794, // Source width in px
                     html2canvas: {
-                        scale: 1, // Use 1:1 scale for exact unit mapping
+                        scale: 1,
                         useCORS: true,
                         letterRendering: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        backgroundColor: '#ffffff',
-                        logging: false
+                        backgroundColor: '#ffffff'
                     }
                 });
             } catch (err) {
                 console.error('PDF Generation Error:', err);
-                element.classList.remove('compact-pdf');
-                buttons.forEach(btn => btn.style.display = 'inline-block');
+                document.body.removeChild(iframe);
                 alert('PDF download failed. Please try again.');
             }
         }
