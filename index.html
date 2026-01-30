@@ -157,11 +157,12 @@
             const element = document.querySelector('.resume-container');
             const buttons = document.querySelectorAll('.button-group, .download-btn');
 
-            // Hide buttons
+            // 1. Prepare UI
             buttons.forEach(btn => btn.style.display = 'none');
             element.classList.add('compact-pdf');
             window.scrollTo(0, 0);
 
+            // 2. Setup jsPDF for A4
             const doc = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
@@ -169,39 +170,45 @@
                 compress: true
             });
 
-            // Dimensions of A4 in mm
-            const pdfWidth = 210;
-            const pdfHeight = 297;
-
-            // Use the newer .html() method for text selectable PDFs
-            await doc.html(element, {
-                callback: function (doc) {
-                    // Ensure only one page
-                    const totalPages = doc.internal.getNumberOfPages();
-                    if (totalPages > 1) {
-                        for (let i = totalPages; i > 1; i--) {
-                            doc.deletePage(i);
+            // 3. Capture with precise scaling
+            // 794px is standard A4 width @ 96 DPI
+            try {
+                await doc.html(element, {
+                    callback: function (doc) {
+                        // Cleanup multi-page overlaps
+                        const totalPages = doc.internal.getNumberOfPages();
+                        if (totalPages > 1) {
+                            for (let i = totalPages; i > 1; i--) {
+                                doc.deletePage(i);
+                            }
                         }
-                    }
-                    doc.save('Chetana_CN_Resume.pdf');
 
-                    // Restore UI
-                    element.classList.remove('compact-pdf');
-                    buttons.forEach(btn => btn.style.display = 'inline-block');
-                },
-                x: 0,
-                y: 0,
-                width: pdfWidth, // target width in mm
-                windowWidth: 794, // pixels for calculation (A4 at 96dpi)
-                html2canvas: {
-                    scale: 1,
-                    useCORS: true,
-                    letterRendering: true,
-                    scrollX: 0,
-                    scrollY: 0,
-                    backgroundColor: '#ffffff'
-                }
-            });
+                        doc.save('Chetana_CN_Resume.pdf');
+
+                        // Restore state
+                        element.classList.remove('compact-pdf');
+                        buttons.forEach(btn => btn.style.display = 'inline-block');
+                    },
+                    x: 0,
+                    y: 0,
+                    width: 210, // A4 width in mm
+                    windowWidth: 794, // Source width in pixels (matches CSS .compact-pdf)
+                    html2canvas: {
+                        scale: 1, // Use 1:1 scale for exact unit mapping
+                        useCORS: true,
+                        letterRendering: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    }
+                });
+            } catch (err) {
+                console.error('PDF Generation Error:', err);
+                element.classList.remove('compact-pdf');
+                buttons.forEach(btn => btn.style.display = 'inline-block');
+                alert('PDF download failed. Please try again.');
+            }
         }
 
         function downloadDOCX() {

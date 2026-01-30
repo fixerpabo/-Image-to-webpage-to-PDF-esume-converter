@@ -380,10 +380,11 @@ body {
 
 /* Compact PDF Mode for Single Page Generation */
 .compact-pdf {
-    width: 210mm !important;
-    height: 297mm !important;
-    min-height: 297mm !important;
-    max-width: none !important;
+    width: 794px !important;
+    /* Fixed pixel width for stable capture */
+    min-height: 1123px !important;
+    /* Fixed pixel height */
+    max-width: 794px !important;
     display: grid !important;
     grid-template-columns: 30% 70% !important;
     /* Force exact split */
@@ -391,22 +392,20 @@ body {
     padding: 0 !important;
     box-shadow: none !important;
     background-color: white !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    z-index: 99999 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
 }
 
 .compact-pdf .sidebar {
-    padding: 1.8rem 1.2rem !important;
+    padding: 30px 20px !important;
     /* Professional padding */
-    gap: 1.2rem !important;
+    gap: 15px !important;
     display: flex !important;
     background-color: #1a3c34 !important;
 }
 
 .compact-pdf .main-content {
-    padding: 2.2rem 2.5rem !important;
+    padding: 40px 45px !important;
     display: block !important;
 }
 
@@ -415,7 +414,7 @@ body {
 }
 
 .compact-pdf .sidebar-header h1 {
-    font-size: 26px !important;
+    font-size: 28px !important;
     /* Exact px for PDF engine stability */
 }
 
@@ -424,7 +423,7 @@ body {
 }
 
 .compact-pdf .sidebar-section h3 {
-    font-size: 16px !important;
+    font-size: 14px !important;
 }
 
 .compact-pdf .sidebar-section p,
