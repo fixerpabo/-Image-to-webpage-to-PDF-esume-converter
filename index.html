@@ -167,7 +167,9 @@
                     scale: 3,
                     useCORS: true,
                     letterRendering: true,
-                    windowWidth: 1200 // Force desktop layout during capture
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: element.offsetWidth
                 },
                 jsPDF: {
                     unit: 'mm',
@@ -190,13 +192,13 @@
                 <style>
                     @page { size: A4; margin: 0; }
                     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; color: #333; }
-                    .docx-container { width: 210mm; min-height: 297mm; display: table; table-layout: fixed; }
-                    .sidebar { width: 30%; background-color: #1a3c34; color: #ffffff; display: table-cell; vertical-align: top; padding: 25pt 15pt; }
-                    .content { width: 70%; background-color: #ffffff; display: table-cell; vertical-align: top; padding: 30pt 25pt; }
+                    .docx-container { width: 100%; min-height: 297mm; display: table; table-layout: fixed; border-collapse: collapse; }
+                    .sidebar { width: 30%; background-color: #1a3c34; color: #ffffff; display: table-cell; vertical-align: top; padding: 20pt 15pt; }
+                    .content { width: 70%; background-color: #ffffff; display: table-cell; vertical-align: top; padding: 25pt 20pt; }
                     
                     h1 { font-family: 'Times New Roman', Times, serif; font-size: 22pt; margin: 0; color: #ffffff; }
                     h2 { font-size: 9pt; text-transform: uppercase; letter-spacing: 1px; color: #ccc; margin: 5pt 0 15pt 0; font-weight: normal; }
-                    h3 { font-family: 'Times New Roman', Times, serif; font-size: 14pt; margin: 15pt 0 8pt 0; border-bottom: 0.5pt solid #eee; padding-bottom: 2pt; color: #333; }
+                    h3 { font-family: 'Times New Roman', Times, serif; font-size: 14pt; margin: 12pt 0 6pt 0; border-bottom: 0.5pt solid #eee; padding-bottom: 2pt; color: #333; }
                     .sidebar h3 { color: #ffffff; border-bottom: none; font-size: 12pt; }
                     
                     p { font-size: 9pt; line-height: 1.3; margin: 0 0 5pt 0; }
@@ -205,76 +207,69 @@
                     ul { margin: 0 0 10pt 15pt; padding: 0; }
                     li { font-size: 9pt; line-height: 1.3; margin-bottom: 3pt; color: #444; }
                     
-                    .job-title { font-weight: bold; color: #000; font-size: 10pt; margin: 0; }
+                    .job-title { font-weight: bold; color: #000; font-size: 10pt; margin: 0; font-family: 'Segoe UI', sans-serif; }
+                    .job-name { font-weight: bold; color: #000; font-size: 10pt; margin: 0; }
                     .job-date { font-size: 8pt; color: #888; text-transform: uppercase; margin: 2pt 0 5pt 0; display: block; }
                     
                     .initiatives-label { font-weight: bold; font-size: 9pt; margin: 10pt 0 5pt 0; display: block; }
+                    a { color: inherit; text-decoration: none; }
                 </style>
             `;
 
-            const element = document.querySelector('.resume-container');
             const html = `
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset="utf-8">${styles}</head>
                 <body>
-                    <div class="docx-container">
-                        <div class="sidebar">
-                            <h1>Chetana CN</h1>
-                            <h2>Associate Product Manager</h2>
-                            
-                            <h3>Details</h3>
-                            <p>8074712529</p>
-                            <p>chinnnagireddy.chetana@gmail.com</p>
-                            
-                            <h3>Links</h3>
-                            <p><a href="https://www.linkedin.com/in/c-n-chetana-93a716258/">LinkedIn</a></p>
-                            <p><a href="https://github.com/fixerpabo">GitHub</a></p>
-                            <p><a href="https://www.notion.so/2f8f6ae4ef9480f19144c745ca574cb2?v=2f8f6ae4ef9480ddaa9f000c276cc769&source=copy_link">Notion</a></p>
-                            <p><a href="https://medium.com/@chinnanagireddy.chetana">Medium</a></p>
-                            
-                            <h3>Skills</h3>
-                            <p>Product Discovery, Problem Framing, MVP Scoping, PRD, Roadmapping, Feature Prioritization, Agile/Scrum, Sprint Planning, Cross-functional Leadership, Stakeholder Alignment, Business Analysis, UX Research, Product Iteration, AI Products, ATS, Product Strategy, Product Lifecycle Management, Requirements Gathering, Backlog Management, Product Analytics, Go-to-Market (GTM), API Design & Integrations, UAT (User Acceptance Testing), GPT / Claude</p>
-                        </td>
-                        <td class="main-cell">
-                            <h3>Profile</h3>
-                            <p>Product Manager / Project Manager with 2+ years owning end-to-end lifecycle for 8+ products across ERP, ATS, and AI/LLM platforms. Delivered 4+ MVPs with 30-40% faster time to market, 95% on-time delivery across 3+ concurrent projects, and 25% less rework by aligning 15+ stakeholders. Technically fluent in API design, data models, and UAT; metrics-driven on KPIs/OKRs, usability, and outcome-focused roadmaps.</p>
-
-                            <h3>Employment History</h3>
-                            <div>
-                                <h4>Product Manager / Project Manager / Business Analyst, ADAINSYS</h4>
-                                <span class="date">MAR 2022 — PRESENT</span>
+                    <table class="docx-container">
+                        <tr>
+                            <td class="sidebar">
+                                <h1>Chetana CN</h1>
+                                <h2>Associate Product Manager</h2>
+                                <h3>Details</h3>
+                                <p>8074712529</p>
+                                <p>chinnnagireddy.chetana@gmail.com</p>
+                                <h3>Links</h3>
+                                <p>LinkedIn | GitHub | Notion | Medium</p>
+                                <h3>Skills</h3>
+                                <p>Product Discovery, Problem Framing, MVP Scoping, PRD, Roadmapping, Feature Prioritization, Agile/Scrum, Sprint Planning, Cross-functional Leadership, Stakeholder Alignment, Business Analysis, UX Research, Product Iteration, AI Products, ATS, Product Strategy, Product Lifecycle Management, Requirements Gathering, Backlog Management, Product Analytics, Go-to-Market (GTM), API Design & Integrations, UAT (User Acceptance Testing), GPT / Claude</p>
+                            </td>
+                            <td class="content">
+                                <h3>Profile</h3>
+                                <p>Product Manager / Project Manager with 2+ years owning end-to-end lifecycle for 8+ products across ERP, ATS, and AI/LLM platforms. Delivered 4+ MVPs with 30-40% faster time to market, 95% on-time delivery across 3+ concurrent projects, and 25% less rework by aligning 15+ stakeholders.</p>
+                                <h3>Employment History</h3>
+                                <p class="job-title">Product Manager / Project Manager / Business Analyst</p>
+                                <p class="job-name">ADAINSYS</p>
+                                <span class="job-date">MAR 2022 — PRESENT</span>
                                 <ul>
-                                    <li>Owned end-to-end delivery of 8+ products across ERP, ATS, AI platforms, and workflow/academic automation—from discovery and requirements to launch, iteration, and adoption.</li>
-                                    <li>Defined problem statements, user journeys, and success metrics (KPIs/OKRs); performed trade-off analysis to balance scope, speed, and scalability in high-ambiguity environments.</li>
-                                    <li>Shipped 4+ MVPs with 30-40% faster time-to-market while maintaining extensible architectures and clear product documentation (PRDs/BRDs, workflows, acceptance criteria).</li>
-                                    <li>Managed 3+ concurrent projects with cross-functional teams (6–10 engineers/design/QA), driving ~95% on-time delivery via Agile/Scrum rituals, sprint planning, and backlog management.</li>
-                                    <li>Aligned 15+ stakeholders on priorities under conflicting requirements, reducing rework by ~25% through structured decision-making and clear change management.</li>
-                                    <li>Led UX research, usability testing, and UAT with 100+ users; resolved 90%+ critical issues pre-release and improved overall product quality at launch.</li>
-                                    <li>Partnered with engineering on API design, system workflows, and data models; maintained documentation in Notion and product writing on Medium.</li>
+                                    <li>Owned end-to-end delivery of 8+ products across ERP, ATS, AI platforms, and workflow/academic automation.</li>
+                                    <li>Defined problem statements, user journeys, and success metrics (KPIs/OKRs); performed trade-off analysis to balance scope, speed, and scalability.</li>
+                                    <li>Shipped 4+ MVPs with 30-40% faster time-to-market while maintaining extensible architectures.</li>
+                                    <li>Managed 3+ concurrent projects with cross-functional teams (6–10 engineers/design/QA), driving ~95% on-time delivery.</li>
+                                    <li>Aligned 15+ stakeholders on priorities under conflicting requirements.</li>
+                                    <li>Led UX research, usability testing, and UAT with 100+ users.</li>
+                                    <li>Partnered with engineering on API design, system workflows, and data models.</li>
                                 </ul>
-                                <p><strong>Selected product initiatives:</strong></p>
+                                <span class="initiatives-label">Selected product initiatives:</span>
                                 <ul>
-                                    <li><strong>AI Meeting Management Platform:</strong> scoped transcription, summaries, action items, semantic search, and analytics using Whisper and GPT/Claude; collaborated on AWS-based deployment approach.</li>
-                                    <li><strong>ATS Platform:</strong> delivered job posting, sourcing automation, recruiter dashboards, and reporting/analytics workflows.</li>
-                                    <li><strong>ERP & Office Management:</strong> owned HR, attendance, and operational workflows to digitize manual processes and enable role-based access.</li>
-                                    <li><strong>Academic/Attendance Systems:</strong> built QR-based attendance, analytics, defaulter tracking, and export/reporting flows.</li>
-                                    <li><strong>No Dues Certificate Platform:</strong> digitized clearance into a role-based workflow with automated PDF generation.</li>
-                                    <li><strong>Kids-Parent Video Platform:</strong> designed trust-first, age-restricted content access and safety controls.</li>
+                                    <li>AI Meeting Management Platform</li>
+                                    <li>ATS Platform</li>
+                                    <li>ERP & Office Management</li>
+                                    <li>Academic/Attendance Systems</li>
+                                    <li>No Dues Certificate Platform</li>
+                                    <li>Kids-Parent Video Platform</li>
                                 </ul>
-                            </div>
-
-                            <h3>Education</h3>
-                            <div>
-                                <h4>Bachelor of Technology (B.Tech), Computer Science, Marri Laxman Reddy Institute of Technology</h4>
+                                <h3>Education</h3>
+                                <p class="job-title">Bachelor of Technology (B.Tech), Computer Science</p>
+                                <p class="job-name">Marri Laxman Reddy Institute of Technology</p>
                                 <p>GPA: 8.3/10</p>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </body>
-            </html>`;
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
 
-            var converted = htmlDocx.asBlob(content);
+            var converted = htmlDocx.asBlob(html);
             saveAs(converted, 'Chetana_CN_Resume.docx');
         }
     </script>
