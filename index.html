@@ -142,8 +142,9 @@
         </main>
     </div>
 
-    <!-- PDF Generation Library - Creates text-based PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- PDF & Style Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- DOCX Generation Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
@@ -151,67 +152,56 @@
 
 
     <script>
-        function downloadPDF() {
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
             const element = document.querySelector('.resume-container');
             const buttons = document.querySelectorAll('.button-group, .download-btn');
 
-            // 1. Hide interactive elements
+            // Hide buttons
             buttons.forEach(btn => btn.style.display = 'none');
-
-            // 2. Apply the "Fixed-A4" overlay class (forces layout to 0,0 fixed)
             element.classList.add('compact-pdf');
-
-            // 3. Force scroll to top (important for html2canvas origin)
             window.scrollTo(0, 0);
 
-            const opt = {
-                margin: 0,
-                filename: 'Chetana_CN_Resume.pdf',
-                image: { type: 'jpeg', quality: 1.0 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    letterRendering: true,
-                    scrollY: 0,
-                    scrollX: 0,
-                    windowWidth: 1000, // Safe width for capture
-                    width: 794,        // Exact A4 width in px at 96 DPI
-                    height: 1123,      // Exact A4 height in px at 96 DPI
-                    x: 0,              // Capture starts exactly at 0,0
-                    y: 0
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                }
-            };
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
 
-            // Use worker to ensure cleanup
-            const worker = html2pdf()
-                .set(opt)
-                .from(element)
-                .toPdf()
-                .get('pdf')
-                .then((pdf) => {
-                    const totalPages = pdf.internal.getNumberOfPages();
+            // Dimensions of A4 in mm
+            const pdfWidth = 210;
+            const pdfHeight = 297;
+
+            // Use the newer .html() method for text selectable PDFs
+            await doc.html(element, {
+                callback: function (doc) {
+                    // Ensure only one page
+                    const totalPages = doc.internal.getNumberOfPages();
                     if (totalPages > 1) {
                         for (let i = totalPages; i > 1; i--) {
-                            pdf.deletePage(i);
+                            doc.deletePage(i);
                         }
                     }
-                })
-                .save()
-                .then(() => {
-                    // Restore state
+                    doc.save('Chetana_CN_Resume.pdf');
+
+                    // Restore UI
                     element.classList.remove('compact-pdf');
                     buttons.forEach(btn => btn.style.display = 'inline-block');
-                })
-                .catch(err => {
-                    console.error('PDF Generation Error:', err);
-                    element.classList.remove('compact-pdf');
-                    buttons.forEach(btn => btn.style.display = 'inline-block');
-                });
+                },
+                x: 0,
+                y: 0,
+                width: pdfWidth, // target width in mm
+                windowWidth: 794, // pixels for calculation (A4 at 96dpi)
+                html2canvas: {
+                    scale: 1,
+                    useCORS: true,
+                    letterRendering: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    backgroundColor: '#ffffff'
+                }
+            });
         }
 
         function downloadDOCX() {
