@@ -28,29 +28,30 @@
     <div class="resume-container">
         <aside class="sidebar">
             <header class="sidebar-header">
-                <h1 contenteditable="true">Chetana CN</h1>
+                <h1 id="res-name" contenteditable="true">Chetana CN</h1>
                 <div class="divider"></div>
-                <h2 contenteditable="true">ASSOCIATE PRODUCT MANAGER</h2>
+                <h2 id="res-title" contenteditable="true">ASSOCIATE PRODUCT MANAGER</h2>
             </header>
 
             <section class="sidebar-section">
                 <h3>Details</h3>
-                <p contenteditable="true">8074712529</p>
-                <p><a href="mailto:chinnnagireddy.chetana@gmail.com"
+                <p id="res-phone" contenteditable="true">8074712529</p>
+                <p><a id="res-email" href="mailto:chinnnagireddy.chetana@gmail.com"
                         contenteditable="true">chinnnagireddy.chetana@gmail.com</a></p>
             </section>
 
             <section class="sidebar-section">
                 <h3>Links</h3>
                 <ul class="link-list">
-                    <li><a href="https://www.linkedin.com/in/c-n-chetana-93a716258/" target="_blank"
-                            rel="noopener noreferrer" contenteditable="true">LinkedIn</a></li>
-                    <li><a href="https://github.com/fixerpabo" target="_blank" rel="noopener noreferrer"
-                            contenteditable="true">GitHub</a></li>
-                    <li><a href="https://www.notion.so/2f8f6ae4ef9480f19144c745ca574cb2?v=2f8f6ae4ef9480ddaa9f000c276cc769&source=copy_link"
+                    <li><a id="res-link-linkedin" href="https://www.linkedin.com/in/c-n-chetana-93a716258/"
+                            target="_blank" rel="noopener noreferrer" contenteditable="true">LinkedIn</a></li>
+                    <li><a id="res-link-github" href="https://github.com/fixerpabo" target="_blank"
+                            rel="noopener noreferrer" contenteditable="true">GitHub</a></li>
+                    <li><a id="res-link-notion"
+                            href="https://www.notion.so/2f8f6ae4ef9480f19144c745ca574cb2?v=2f8f6ae4ef9480ddaa9f000c276cc769&source=copy_link"
                             target="_blank" rel="noopener noreferrer" contenteditable="true">Notion</a></li>
-                    <li><a href="https://medium.com/@chinnanagireddy.chetana" target="_blank" rel="noopener noreferrer"
-                            contenteditable="true">Medium</a></li>
+                    <li><a id="res-link-medium" href="https://medium.com/@chinnanagireddy.chetana" target="_blank"
+                            rel="noopener noreferrer" contenteditable="true">Medium</a></li>
                 </ul>
             </section>
 
@@ -88,7 +89,8 @@
         <main class="main-content">
             <section class="content-section">
                 <h3>Profile</h3>
-                <p contenteditable="true">Product Manager / Project Manager with 2+ years owning end-to-end lifecycle
+                <p id="res-profile" contenteditable="true">Product Manager / Project Manager with 2+ years owning
+                    end-to-end lifecycle
                     for 8+ products across
                     ERP, ATS, and AI/LLM platforms. Delivered 4+ MVPs with 30-40% faster time to market, 95% on-time
                     delivery across 3+ concurrent projects, and 25% less rework by aligning 15+ stakeholders.
@@ -100,8 +102,9 @@
                 <h3>Employment History</h3>
                 <div class="job-entry">
                     <div class="job-header">
-                        <h4 contenteditable="true">Product Manager / Project Manager / Business Analyst, ADAINSYS</h4>
-                        <span class="date" contenteditable="true">MAR 2022 — PRESENT</span>
+                        <h4 id="res-job-title" contenteditable="true">Product Manager / Project Manager / Business
+                            Analyst, ADAINSYS</h4>
+                        <span id="res-job-date" class="date" contenteditable="true">MAR 2022 — PRESENT</span>
                     </div>
                     <ul contenteditable="true">
                         <li>Owned end-to-end delivery of 8+ products across ERP, ATS, AI platforms, and
@@ -144,8 +147,9 @@
             <section class="content-section">
                 <h3>Education</h3>
                 <div class="education-entry">
-                    <h4 contenteditable="true">B.Tech, Computer Science, Marri Laxman Reddy Institute of Technology</h4>
-                    <p contenteditable="true">GPA: 8.3/10</p>
+                    <h4 id="res-edu-title" contenteditable="true">B.Tech, Computer Science, Marri Laxman Reddy Institute
+                        of Technology</h4>
+                    <p id="res-edu-gpa" contenteditable="true">GPA: 8.3/10</p>
                 </div>
             </section>
         </main>
@@ -292,7 +296,21 @@
         }
 
         function downloadDOCX() {
-            // Simplified, clean table-based HTML for high-fidelity DOCX
+            // Fetch all current values from the page
+            const name = document.getElementById('res-name').innerText;
+            const title = document.getElementById('res-title').innerText;
+            const phone = document.getElementById('res-phone').innerText;
+            const email = document.getElementById('res-email').innerText;
+            const jobTitle = document.getElementById('res-job-title').innerText;
+            const jobDate = document.getElementById('res-job-date').innerText;
+            const eduTitle = document.getElementById('res-edu-title').innerText;
+            const eduGpa = document.getElementById('res-edu-gpa').innerText;
+            const profile = document.querySelector('.content-section p').innerText;
+
+            const skills = Array.from(document.querySelectorAll('.skill-list li')).map(li => `<li>${li.innerText}</li>`).join('');
+            const jobBullets = Array.from(document.querySelectorAll('.job-entry > ul > li')).map(li => `<li>${li.innerText}</li>`).join('');
+            const initiatives = Array.from(document.querySelectorAll('.initiatives-list li')).map(li => `<li>${li.innerText}</li>`).join('');
+
             const styles = `
                 <style>
                     @page { size: A4; margin: 0; }
@@ -319,40 +337,39 @@
                         <table>
                             <tr>
                                 <td class="sidebar">
-                                    <h1>Chetana CN</h1>
-                                    <h2>Associate Product Manager</h2>
+                                    <h1>${name}</h1>
+                                    <h2>${title}</h2>
                                     <h3>Details</h3>
-                                    <p>8074712529</p>
-                                    <p>chinnnagireddy.chetana@gmail.com</p>
+                                    <p>${phone}</p>
+                                    <p>${email}</p>
                                     <h3>Links</h3>
                                     <ul>
-                                        <li>LinkedIn</li>
-                                        <li>GitHub</li>
-                                        <li>Notion</li>
-                                        <li>Medium</li>
+                                        <li>${document.getElementById('res-link-linkedin').innerText}</li>
+                                        <li>${document.getElementById('res-link-github').innerText}</li>
+                                        <li>${document.getElementById('res-link-notion').innerText}</li>
+                                        <li>${document.getElementById('res-link-medium').innerText}</li>
                                     </ul>
                                     <h3>Skills</h3>
                                     <ul>
-                                        ${Array.from(document.querySelectorAll('.skill-list li')).map(li => `<li>${li.innerText}</li>`).join('')}
+                                        ${skills}
                                     </ul>
                                 </td>
                                 <td class="content">
                                     <h3>Profile</h3>
-                                    <p>${document.querySelector('.content-section p').innerText}</p>
+                                    <p>${document.getElementById('res-profile').innerText}</p>
                                     <h3>Employment History</h3>
-                                    <p class="job-title">Product Manager / Project Manager / Business Analyst</p>
-                                    <p>ADAINSYS</p>
-                                    <p class="date">Mar 2022 — Present</p>
+                                    <p class="job-title">${jobTitle}</p>
+                                    <p class="date">${jobDate}</p>
                                     <ul>
-                                        ${Array.from(document.querySelectorAll('.job-entry > ul > li')).map(li => `<li>${li.innerText}</li>`).join('')}
+                                        ${jobBullets}
                                     </ul>
                                     <p><b>Selected product initiatives:</b></p>
                                     <ul>
-                                        ${Array.from(document.querySelectorAll('.initiatives-list li')).map(li => `<li>${li.innerText}</li>`).join('')}
+                                        ${initiatives}
                                     </ul>
                                     <h3>Education</h3>
-                                    <p class="job-title">B.Tech, Computer Science, Marri Laxman Reddy Institute of Technology</p>
-                                    <p>GPA: 8.3/10</p>
+                                    <p class="job-title">${eduTitle}</p>
+                                    <p>${eduGpa}</p>
                                 </td>
                             </tr>
                         </table>
