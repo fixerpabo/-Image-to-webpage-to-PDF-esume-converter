@@ -152,25 +152,17 @@
 
     <script>
         function downloadPDF() {
-            const container = document.querySelector('.resume-container');
+            const element = document.querySelector('.resume-container');
+            const buttons = document.querySelectorAll('.button-group, .download-btn');
 
-            // Create a clone for isolated rendering
-            const clone = container.cloneNode(true);
-
-            // Hide buttons in the clone
-            const buttons = clone.querySelectorAll('.button-group, .download-btn');
+            // 1. Hide buttons
             buttons.forEach(btn => btn.style.display = 'none');
 
-            // Apply specific styles to clone to force layout stability
-            clone.style.position = 'fixed';
-            clone.style.top = '0';
-            clone.style.left = '-10000px'; // Move off-screen
-            clone.style.width = '210mm';
-            clone.style.height = '297mm';
-            clone.style.margin = '0';
-            clone.style.boxShadow = 'none';
-            clone.style.zIndex = '-9999';
-            document.body.appendChild(clone);
+            // 2. Add compact-pdf class for perfect A4 layout
+            element.classList.add('compact-pdf');
+
+            // 3. Ensure we are scrolled to the top for a clean capture
+            window.scrollTo(0, 0);
 
             const opt = {
                 margin: 0,
@@ -180,8 +172,9 @@
                     scale: 3,
                     useCORS: true,
                     letterRendering: true,
-                    width: 794,  // Exact A4 width in pixels at 96 DPI
-                    windowWidth: 794 // Force capture at this width
+                    scrollY: 0,
+                    scrollX: 0,
+                    windowWidth: 800 // Close to A4 pixel width
                 },
                 jsPDF: {
                     unit: 'mm',
@@ -190,11 +183,14 @@
                 }
             };
 
-            html2pdf().set(opt).from(clone).save().then(() => {
-                document.body.removeChild(clone);
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore state
+                element.classList.remove('compact-pdf');
+                buttons.forEach(btn => btn.style.display = 'inline-block');
             }).catch(err => {
                 console.error('PDF Generation Error:', err);
-                document.body.removeChild(clone);
+                element.classList.remove('compact-pdf');
+                buttons.forEach(btn => btn.style.display = 'inline-block');
             });
         }
 
