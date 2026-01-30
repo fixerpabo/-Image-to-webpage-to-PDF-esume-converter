@@ -112,7 +112,7 @@
                         <li>Partnered with engineering on API design, system workflows, and data models; maintained
                             documentation in Notion and product writing on Medium.</li>
                     </ul>
-                    <p class="initiatives-label">Selected product initiatives:</p>
+                    <h5 class="initiatives-label">Selected product initiatives:</h5>
                     <ul class="initiatives-list">
                         <li><strong>AI Meeting Management Platform:</strong> scoped transcription, summaries, action
                             items, semantic search, and analytics using Whisper and GPT/Claude; collaborated on
@@ -142,14 +142,13 @@
         </main>
     </div>
 
-    <!-- PDF & Style Generation Libraries -->
+    <!-- PDF Generation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- DOCX Generation Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
 
     <script>
         async function downloadPDF() {
@@ -189,7 +188,8 @@
                             height: 1123px !important; 
                             margin: 0 !important; 
                             box-shadow: none !important;
-                            grid-template-columns: 30% 70% !important;
+                            grid-template-columns: 33% 67% !important; /* Refined split */
+                            display: grid !important;
                         }
                         .button-group, .download-btn { display: none !important; }
                         body { margin: 0; padding: 0; background: white; }
@@ -202,15 +202,22 @@
             `);
             iframeDoc.close();
 
-            // Wait for fonts and styles to load in iframe
-            await new Promise(resolve => iframe.contentWindow.onload = resolve);
+            // 4. Wait for fonts and styles to load in iframe
+            await new Promise(resolve => {
+                if (iframe.contentWindow.document.readyState === 'complete') {
+                    setTimeout(resolve, 500); // Extra buffer for Google Fonts
+                } else {
+                    iframe.contentWindow.onload = () => setTimeout(resolve, 500);
+                }
+            });
 
-            // 4. Generate PDF from Iframe
+            // 5. Generate PDF from Iframe
             const doc = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
                 format: 'a4',
-                compress: true
+                compress: true,
+                precision: 16
             });
 
             try {
@@ -227,11 +234,14 @@
                     y: 0,
                     width: 210, // Target A4 width in mm
                     windowWidth: 794, // Source width in px
+                    autoPaging: 'text',
                     html2canvas: {
                         scale: 1,
                         useCORS: true,
                         letterRendering: true,
-                        backgroundColor: '#ffffff'
+                        backgroundColor: '#ffffff',
+                        dpi: 300,
+                        imageTimeout: 15000
                     }
                 });
             } catch (err) {
