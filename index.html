@@ -246,7 +246,10 @@
                     precision: 16
                 });
 
-                await doc.html(iframeDoc.body, {
+                // Get the cloned element from the iframe
+                const frameElement = iframeDoc.querySelector('.resume-container');
+
+                await doc.html(frameElement, {
                     callback: function (doc) {
                         const totalPages = doc.internal.getNumberOfPages();
                         if (totalPages > 1) {
@@ -270,8 +273,12 @@
                         letterRendering: true,
                         backgroundColor: '#ffffff',
                         logging: false,
+                        // CRITICAL: Force html2canvas to capture from 0,0 
+                        // ignoring any scroll position of the main window
                         scrollX: 0,
-                        scrollY: 0
+                        scrollY: 0,
+                        windowWidth: 794,
+                        windowHeight: 1123
                     }
                 });
             } catch (err) {
