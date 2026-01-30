@@ -14,16 +14,23 @@
 </head>
 
 <body>
+    <nav class="top-nav">
+        <div class="logo">Professional Resume Builder</div>
+        <div class="button-group">
+            <button onclick="downloadPDF(this)" class="download-btn">
+                <span class="btn-text">Download PDF</span>
+                <span class="btn-loader" style="display:none;">Generating...</span>
+            </button>
+            <button onclick="downloadDOCX()" class="download-btn">Download DOCX</button>
+        </div>
+    </nav>
+
     <div class="resume-container">
         <aside class="sidebar">
             <header class="sidebar-header">
                 <h1>Chetana CN</h1>
                 <div class="divider"></div>
                 <h2>ASSOCIATE PRODUCT MANAGER</h2>
-                <div class="button-group">
-                    <button onclick="downloadPDF()" class="download-btn">Download PDF</button>
-                    <button onclick="downloadDOCX()" class="download-btn">Download DOCX</button>
-                </div>
             </header>
 
             <section class="sidebar-section">
@@ -131,14 +138,6 @@
                 </div>
             </section>
 
-            <section class="content-section">
-                <h3>Education</h3>
-                <div class="education-entry">
-                    <h4>Bachelor of Technology (B.Tech), Computer Science, Marri Laxman Reddy Institute of Technology
-                    </h4>
-                    <p>GPA: 8.3/10</p>
-                </div>
-            </section>
         </main>
     </div>
 
@@ -151,172 +150,136 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <script>
-        async function downloadPDF() {
+        async function downloadPDF(btn) {
             const { jsPDF } = window.jspdf;
             const element = document.querySelector('.resume-container');
 
-            // 1. Create a hidden iframe for isolated rendering
-            const iframe = document.createElement('iframe');
-            iframe.style.position = 'fixed';
-            iframe.style.left = '-10000px';
-            iframe.style.top = '0';
-            iframe.style.width = '794px'; // A4 width at 96 DPI
-            iframe.style.height = '1123px'; // A4 height at 96 DPI
-            document.body.appendChild(iframe);
-
-            const iframeDoc = iframe.contentWindow.document;
-
-            // 2. Clone Styles
-            const styles = Array.from(document.styleSheets)
-                .map(sheet => {
-                    try {
-                        return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
-                    } catch (e) { return ''; }
-                }).join('\n');
-
-            // 3. Prepare Iframe Content
-            iframeDoc.open();
-            iframeDoc.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-                    <style>
-                        ${styles}
-                        .resume-container { 
-                            width: 794px !important; 
-                            height: 1123px !important; 
-                            margin: 0 !important; 
-                            box-shadow: none !important;
-                            grid-template-columns: 33% 67% !important; /* Refined split */
-                            display: grid !important;
-                        }
-                        .button-group, .download-btn { display: none !important; }
-                        body { margin: 0; padding: 0; background: white; }
-                    </style>
-                </head>
-                <body>
-                    ${element.outerHTML}
-                </body>
-                </html>
-            `);
-            iframeDoc.close();
-
-            // 4. Wait for fonts and styles to load in iframe
-            await new Promise(resolve => {
-                if (iframe.contentWindow.document.readyState === 'complete') {
-                    setTimeout(resolve, 500); // Extra buffer for Google Fonts
-                } else {
-                    iframe.contentWindow.onload = () => setTimeout(resolve, 500);
-                }
-            });
-
-            // 5. Generate PDF from Iframe
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4',
-                compress: true,
-                precision: 16
-            });
+            // UI Feedback
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoader = btn.querySelector('.btn-loader');
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline';
+            btn.disabled = true;
 
             try {
-                await doc.html(iframeDoc.body, {
+                // Ensure fonts are loaded
+                await document.fonts.ready;
+
+                // Create PDF (A4)
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
+                    compress: true,
+                    precision: 16
+                });
+
+                // High-Fidelity Capture Settings
+                // We use autoPaging: 'text' to ensure selectable text
+                await doc.html(element, {
                     callback: function (doc) {
                         const totalPages = doc.internal.getNumberOfPages();
                         if (totalPages > 1) {
                             for (let i = totalPages; i > 1; i--) { doc.deletePage(i); }
                         }
                         doc.save('Chetana_CN_Resume.pdf');
-                        document.body.removeChild(iframe);
+
+                        // Restore UI
+                        btnText.style.display = 'inline';
+                        btnLoader.style.display = 'none';
+                        btn.disabled = false;
                     },
                     x: 0,
                     y: 0,
-                    width: 210, // Target A4 width in mm
-                    windowWidth: 794, // Source width in px
-                    autoPaging: 'text',
+                    width: 210, // A4 width in mm
+                    windowWidth: 794, // Standard A4 width in px for consistent rendering
                     html2canvas: {
                         scale: 1,
                         useCORS: true,
                         letterRendering: true,
                         backgroundColor: '#ffffff',
-                        dpi: 300,
-                        imageTimeout: 15000
+                        logging: false
                     }
                 });
             } catch (err) {
                 console.error('PDF Generation Error:', err);
-                document.body.removeChild(iframe);
-                alert('PDF download failed. Please try again.');
+                alert('PDF generation failed. Please check the console for details.');
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+                btn.disabled = false;
             }
         }
 
         function downloadDOCX() {
+            // Simplified, clean table-based HTML for high-fidelity DOCX
             const styles = `
                 <style>
                     @page { size: A4; margin: 0; }
                     body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
                     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-                    .sidebar { width: 30%; background-color: #1a3c34; color: #ffffff; padding: 20pt 15pt; vertical-align: top; }
-                    .content { width: 70%; background-color: #ffffff; padding: 25pt 20pt; vertical-align: top; }
+                    .sidebar { width: 33%; background-color: #11342c; color: #ffffff; padding: 25pt 18pt; vertical-align: top; }
+                    .content { width: 67%; background-color: #ffffff; padding: 25pt 22pt; vertical-align: top; }
                     h1 { font-family: 'Times New Roman', serif; font-size: 20pt; margin: 0 0 5pt 0; color: #ffffff; }
-                    h2 { font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: #cccccc; margin: 0 0 15pt 0; font-weight: normal; }
-                    h3 { font-family: 'Times New Roman', serif; font-size: 14pt; margin: 12pt 0 6pt 0; color: #333333; border-bottom: 0.5pt solid #dddddd; padding-bottom: 2pt; }
-                    .sidebar h3 { color: #ffffff; border-bottom: none; font-size: 12pt; }
-                    p, li { font-size: 9pt; line-height: 1.3; margin-bottom: 4pt; color: #444444; }
-                    .sidebar p, .sidebar li { color: #eeeeee; font-size: 8.5pt; }
-                    .job-title { font-weight: bold; color: #000000; font-size: 10pt; margin: 0; }
-                    .job-name { font-weight: bold; color: #000000; font-size: 10pt; margin: 0; }
-                    .job-date { font-size: 8pt; color: #888888; text-transform: uppercase; margin: 2pt 0 6pt 0; display: block; }
-                    a { color: inherit; text-decoration: none; }
+                    h2 { font-size: 8pt; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 20pt; color: #ffffff; }
+                    h3 { font-size: 14pt; margin: 15pt 0 10pt 0; border-bottom: 1pt solid #eeeeee; padding-bottom: 3pt; color: #333333; }
+                    .sidebar h3 { font-size: 11pt; border-bottom: none; color: #ffffff; }
+                    p, li { font-size: 9pt; line-height: 1.4; color: #333333; margin-bottom: 5pt; }
+                    .sidebar p, .sidebar li { color: #ffffff; opacity: 0.9; }
+                    ul { margin: 0; padding-left: 12pt; }
+                    .job-title { font-weight: bold; font-size: 10pt; color: #000000; }
+                    .date { font-size: 8pt; color: #888888; text-transform: uppercase; }
                 </style>
             `;
 
-            const html = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset="utf-8">${styles}</head>
-                <body>
-                    <table>
-                        <tr>
-                            <td class="sidebar">
-                                <h1>Chetana CN</h1>
-                                <h2>Associate Product Manager</h2>
-                                <h3>Details</h3>
-                                <p>8074712529</p>
-                                <p>chinnnagireddy.chetana@gmail.com</p>
-                                <h3>Links</h3>
-                                <p>LinkedIn | GitHub | Notion | Medium</p>
-                                <h3>Skills</h3>
-                                <p>Product Discovery, Problem Framing, MVP Scoping, PRD, Roadmapping, Feature Prioritization, Agile/Scrum, Sprint Planning, Cross-functional Leadership, Stakeholder Alignment, Business Analysis, UX Research, Product Iteration, AI Products, ATS, Product Strategy, Product Lifecycle Management, Requirements Gathering, Backlog Management, Product Analytics, Go-to-Market (GTM), API Design & Integrations, UAT (User Acceptance Testing), GPT / Claude</p>
-                            </td>
-                            <td class="content">
-                                <h3>Profile</h3>
-                                <p>Product Manager / Project Manager with 2+ years owning end-to-end lifecycle for 8+ products across ERP, ATS, and AI/LLM platforms. Delivered 4+ MVPs with 30-40% faster time to market, 95% on-time delivery across 3+ concurrent projects, and 25% less rework by aligning 15+ stakeholders.</p>
-                                <h3>Employment History</h3>
-                                <p class="job-title">Product Manager / Project Manager / Business Analyst</p>
-                                <p class="job-name">ADAINSYS</p>
-                                <span class="job-date">MAR 2022 — PRESENT</span>
-                                <ul>
-                                    <li>Owned end-to-end delivery of 8+ products across ERP, ATS, AI platforms, and workflow/academic automation.</li>
-                                    <li>Defined problem statements, user journeys, and success metrics (KPIs/OKRs); performed trade-off analysis.</li>
-                                    <li>Shipped 4+ MVPs with 30-40% faster time-to-market while maintaining extensible architectures.</li>
-                                    <li>Managed 3+ concurrent projects with cross-functional teams, driving ~95% on-time delivery.</li>
-                                    <li>Aligned 15+ stakeholders on priorities under conflicting requirements.</li>
-                                    <li>Led UX research, usability testing, and UAT with 100+ users.</li>
-                                    <li>Partnered with engineering on API design, system workflows, and data models.</li>
-                                </ul>
-                                <h3>Education</h3>
-                                <p class="job-title">Bachelor of Technology (B.Tech), Computer Science</p>
-                                <p class="job-name">Marri Laxman Reddy Institute of Technology</p>
-                                <p>GPA: 8.3/10</p>
-                            </td>
-                        </tr>
-                    </table>
-                </body>
+            const resumeHtml = `
+                <html>
+                    <head><meta charset="utf-8">${styles}</head>
+                    <body>
+                        <table>
+                            <tr>
+                                <td class="sidebar">
+                                    <h1>Chetana CN</h1>
+                                    <h2>Associate Product Manager</h2>
+                                    <h3>Details</h3>
+                                    <p>8074712529</p>
+                                    <p>chinnnagireddy.chetana@gmail.com</p>
+                                    <h3>Links</h3>
+                                    <ul>
+                                        <li>LinkedIn</li>
+                                        <li>GitHub</li>
+                                        <li>Notion</li>
+                                        <li>Medium</li>
+                                    </ul>
+                                    <h3>Skills</h3>
+                                    <ul>
+                                        ${Array.from(document.querySelectorAll('.skill-list li')).map(li => `<li>${li.innerText}</li>`).join('')}
+                                    </ul>
+                                </td>
+                                <td class="content">
+                                    <h3>Profile</h3>
+                                    <p>${document.querySelector('.content-section p').innerText}</p>
+                                    <h3>Employment History</h3>
+                                    <p class="job-title">Product Manager / Project Manager / Business Analyst</p>
+                                    <p>ADAINSYS</p>
+                                    <p class="date">Mar 2022 — Present</p>
+                                    <ul>
+                                        ${Array.from(document.querySelectorAll('.job-entry > ul > li')).map(li => `<li>${li.innerText}</li>`).join('')}
+                                    </ul>
+                                    <p><b>Selected product initiatives:</b></p>
+                                    <ul>
+                                        ${Array.from(document.querySelectorAll('.initiatives-list li')).map(li => `<li>${li.innerText}</li>`).join('')}
+                                    </ul>
+                                    <h3>Education</h3>
+                                    <p class="job-title">B.Tech, Computer Science, Marri Laxman Reddy Institute of Technology</p>
+                                    <p>GPA: 8.3/10</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
                 </html>
             `;
 
-            const converted = htmlDocx.asBlob(html);
+            const converted = htmlDocx.asBlob(resumeHtml);
             saveAs(converted, 'Chetana_CN_Resume.docx');
         }
     </script>
