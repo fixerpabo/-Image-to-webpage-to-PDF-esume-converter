@@ -161,27 +161,51 @@
             const opt = {
                 margin: 0,
                 filename: 'Chetana_CN_Resume.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
+                image: {
+                    type: 'jpeg',
+                    quality: 1.0
+                },
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
                     logging: false,
                     letterRendering: true,
                     allowTaint: false,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    width: 794,  // A4 width in pixels at 96 DPI
+                    height: 1123, // A4 height in pixels at 96 DPI
+                    windowWidth: 794,
+                    windowHeight: 1123
                 },
                 jsPDF: {
                     unit: 'mm',
                     format: 'a4',
                     orientation: 'portrait',
-                    compress: true
+                    compress: true,
+                    precision: 16
                 },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    before: '.page-break-before',
+                    after: '.page-break-after',
+                    avoid: '.no-break'
+                }
             };
 
             html2pdf()
                 .set(opt)
                 .from(element)
+                .toPdf()
+                .get('pdf')
+                .then((pdf) => {
+                    // Ensure single page
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    if (totalPages > 1) {
+                        for (let i = totalPages; i > 1; i--) {
+                            pdf.deletePage(i);
+                        }
+                    }
+                })
                 .save()
                 .then(() => {
                     // Restore buttons
