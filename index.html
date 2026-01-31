@@ -182,25 +182,46 @@
             }
 
             try {
-                // Wait a moment for any focus effects to clear
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // Wait for blur to take effect
+                await new Promise(resolve => setTimeout(resolve, 200));
 
-                // Capture the resume container directly using html2canvas
-                const canvas = await html2canvas(element, {
-                    scale: 2, // High quality
+                // Create a temporary container for clean capture
+                const captureContainer = document.createElement('div');
+                captureContainer.style.position = 'fixed';
+                captureContainer.style.left = '-9999px';
+                captureContainer.style.top = '0';
+                captureContainer.style.width = '794px';
+                captureContainer.style.height = '1123px';
+                captureContainer.style.background = 'white';
+                captureContainer.style.overflow = 'hidden';
+                document.body.appendChild(captureContainer);
+
+                // Clone the resume
+                const clone = element.cloneNode(true);
+                clone.style.margin = '0';
+                clone.style.boxShadow = 'none';
+                clone.style.width = '794px';
+                clone.style.height = '1123px';
+                captureContainer.appendChild(clone);
+
+                // Wait for render
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Capture with html2canvas
+                const canvas = await html2canvas(captureContainer, {
+                    scale: 2,
                     useCORS: true,
                     allowTaint: false,
                     backgroundColor: '#ffffff',
                     logging: false,
                     width: 794,
-                    height: 1123,
-                    windowWidth: 794,
-                    windowHeight: 1123,
-                    x: 0,
-                    y: 0
+                    height: 1123
                 });
 
-                // Create PDF with exact A4 dimensions
+                // Remove temporary container
+                document.body.removeChild(captureContainer);
+
+                // Create PDF
                 const pdf = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
@@ -210,11 +231,9 @@
 
                 // Convert canvas to image and add to PDF
                 const imgData = canvas.toDataURL('image/png');
-
-                // A4 dimensions in mm: 210 x 297
                 pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
 
-                // Save the PDF
+                // Save
                 pdf.save('Chetana_CN_Resume.pdf');
 
                 // Restore UI
@@ -224,7 +243,7 @@
 
             } catch (err) {
                 console.error('PDF Generation Error:', err);
-                alert('PDF generation failed. Check console for details.');
+                alert('PDF generation failed: ' + err.message);
                 btnText.style.display = 'inline';
                 btnLoader.style.display = 'none';
                 btn.disabled = false;
