@@ -49,20 +49,44 @@ body {
     font-size: 1.2rem;
 }
 
-.button-group {
+/* Side Floating Controls */
+.side-controls {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
 }
 
-.top-nav .download-btn {
-    margin: 0;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+.side-btn {
+    background-color: var(--sidebar-bg);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
+    font-family: var(--body-font);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
-.top-nav .download-btn:hover {
-    background-color: #ffffff;
-    color: #11342c;
+.side-btn:hover {
+    transform: translateX(-5px);
+    background-color: #1a4d41;
+    box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.side-btn .btn-text {
+    font-size: 0.85rem;
 }
 
 /* Resume A4 Sheet Container - Locked to precise A4 Pixels for 1:1 Export */
@@ -293,18 +317,20 @@ body {
     word-break: break-all;
 }
 
-/* Remove old buttons styles */
-.download-btn {
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    color: #fff;
-    padding: 0.6rem 1.2rem;
-    font-family: var(--body-font);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
+@media (max-width: 1100px) {
+    .side-controls {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        top: auto;
+        transform: none;
+        flex-direction: row;
+    }
+
+    .side-btn {
+        min-width: auto;
+        padding: 0.8rem 1.2rem;
+    }
 }
 
 /* Print Settings */

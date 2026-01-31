@@ -16,14 +16,15 @@
 <body>
     <nav class="top-nav">
         <div class="logo">Professional Resume Builder</div>
-        <div class="button-group">
-            <button onclick="downloadPDF(this)" class="download-btn">
-                <span class="btn-text">Download PDF</span>
-                <span class="btn-loader" style="display:none;">Generating...</span>
-            </button>
-            <button onclick="downloadDOCX()" class="download-btn">Download DOCX</button>
-        </div>
     </nav>
+
+    <div class="side-controls">
+        <button onclick="downloadPDF(this)" class="download-btn side-btn">
+            <span class="btn-text">Download PDF</span>
+            <span class="btn-loader" style="display:none;">Generating...</span>
+        </button>
+        <button onclick="downloadDOCX()" class="download-btn side-btn">Download DOCX</button>
+    </div>
 
     <div class="resume-container">
         <aside class="sidebar">
