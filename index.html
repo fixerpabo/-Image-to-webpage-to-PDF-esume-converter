@@ -181,116 +181,50 @@
                 document.activeElement.blur();
             }
 
-            // 1. Create a hidden iframe for isolated rendering
-            // This fixes the alignment/offset issue by isolating the capture environment
-            const iframe = document.createElement('iframe');
-            iframe.style.position = 'fixed';
-            iframe.style.left = '-10000px';
-            iframe.style.top = '0';
-            iframe.style.width = '794px';
-            iframe.style.height = '1123px';
-            document.body.appendChild(iframe);
-
-            const iframeDoc = iframe.contentWindow.document;
-
-            // 2. Clone Styles
-            const styles = Array.from(document.styleSheets)
-                .map(sheet => {
-                    try {
-                        return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
-                    } catch (e) { return ''; }
-                }).join('\n');
-
-            // 3. Prepare Iframe Content
-            iframeDoc.open();
-            iframeDoc.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-                    <style>
-                        ${styles}
-                        .resume-container { 
-                            width: 794px !important; 
-                            height: 1123px !important; 
-                            margin: 0 !important; 
-                            box-shadow: none !important;
-                            display: grid !important;
-                            grid-template-columns: 33% 67% !important;
-                        }
-                        .top-nav, .side-controls, .button-group { display: none !important; }
-                        body { margin: 0; padding: 0; background: white; overflow: hidden; }
-                    </style>
-                </head>
-                <body>
-                    ${element.outerHTML}
-                </body>
-                </html>
-            `);
-            iframeDoc.close();
-
             try {
-                // 4. Wait for fonts and styles to load in iframe
-                await new Promise(resolve => {
-                    const checkLoaded = () => {
-                        // Use the fonts.ready API for accurate loading check
-                        if (iframe.contentWindow.document.readyState === 'complete') {
-                            iframe.contentWindow.document.fonts.ready.then(() => {
-                                setTimeout(resolve, 800); // Small buffer for rendering
-                            });
-                        } else {
-                            setTimeout(checkLoaded, 100);
-                        }
-                    };
-                    checkLoaded();
+                // Wait a moment for any focus effects to clear
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Capture the resume container directly using html2canvas
+                const canvas = await html2canvas(element, {
+                    scale: 2, // High quality
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: 794,
+                    height: 1123,
+                    windowWidth: 794,
+                    windowHeight: 1123,
+                    x: 0,
+                    y: 0
                 });
 
-                // 5. Generate PDF from Iframe content (Definitive 1:1 Parity)
-                const doc = new jsPDF({
+                // Create PDF with exact A4 dimensions
+                const pdf = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
                     format: 'a4',
-                    compress: true,
-                    precision: 16
+                    compress: true
                 });
 
-                // Get the cloned element from the iframe
-                const frameElement = iframeDoc.querySelector('.resume-container');
+                // Convert canvas to image and add to PDF
+                const imgData = canvas.toDataURL('image/png');
 
-                await doc.html(frameElement, {
-                    callback: function (doc) {
-                        const totalPages = doc.internal.getNumberOfPages();
-                        if (totalPages > 1) {
-                            for (let i = totalPages; i > 1; i--) { doc.deletePage(i); }
-                        }
-                        doc.save('Chetana_CN_Resume.pdf');
+                // A4 dimensions in mm: 210 x 297
+                pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
 
-                        // Restore UI and cleanup
-                        document.body.removeChild(iframe);
-                        btnText.style.display = 'inline';
-                        btnLoader.style.display = 'none';
-                        btn.disabled = false;
-                    },
-                    x: 0,
-                    y: 0,
-                    width: 210,
-                    windowWidth: 794,
-                    html2canvas: {
-                        scale: 2, // Increase scale for high-fidelity/sharp text
-                        useCORS: true,
-                        letterRendering: true,
-                        backgroundColor: '#ffffff',
-                        logging: false,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: 794,
-                        windowHeight: 1123
-                    }
-                });
+                // Save the PDF
+                pdf.save('Chetana_CN_Resume.pdf');
+
+                // Restore UI
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+                btn.disabled = false;
+
             } catch (err) {
                 console.error('PDF Generation Error:', err);
-                if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                alert('PDF generation failed. Check console.');
+                alert('PDF generation failed. Check console for details.');
                 btnText.style.display = 'inline';
                 btnLoader.style.display = 'none';
                 btn.disabled = false;
