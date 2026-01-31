@@ -218,7 +218,7 @@
                             display: grid !important;
                             grid-template-columns: 33% 67% !important;
                         }
-                        .top-nav, .button-group { display: none !important; }
+                        .top-nav, .side-controls, .button-group { display: none !important; }
                         body { margin: 0; padding: 0; background: white; overflow: hidden; }
                     </style>
                 </head>
@@ -233,8 +233,11 @@
                 // 4. Wait for fonts and styles to load in iframe
                 await new Promise(resolve => {
                     const checkLoaded = () => {
+                        // Use the fonts.ready API for accurate loading check
                         if (iframe.contentWindow.document.readyState === 'complete') {
-                            setTimeout(resolve, 500);
+                            iframe.contentWindow.document.fonts.ready.then(() => {
+                                setTimeout(resolve, 800); // Small buffer for rendering
+                            });
                         } else {
                             setTimeout(checkLoaded, 100);
                         }
@@ -273,13 +276,11 @@
                     width: 210,
                     windowWidth: 794,
                     html2canvas: {
-                        scale: 1,
+                        scale: 2, // Increase scale for high-fidelity/sharp text
                         useCORS: true,
                         letterRendering: true,
                         backgroundColor: '#ffffff',
                         logging: false,
-                        // CRITICAL: Force html2canvas to capture from 0,0 
-                        // ignoring any scroll position of the main window
                         scrollX: 0,
                         scrollY: 0,
                         windowWidth: 794,
